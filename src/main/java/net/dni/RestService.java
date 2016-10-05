@@ -1,25 +1,28 @@
 package net.dni;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+import java.util.concurrent.ExecutionException;
 
-@Service
-@Path("/")
+@RestController
 public class RestService {
 
-    @GET
-    public String get() {
+    private final MultithreadingController controller;
 
-//        String fooResourceUrl = "http://www.google.com";
-        String fooResourceUrl = "http://www.bing.com";
-        RestTemplate restTemplate = new RestTemplate();
-        long timer = System.nanoTime();
-        restTemplate.getForEntity(fooResourceUrl, String.class);
-        timer = System.nanoTime() - timer;
+    @Autowired
+    public RestService(MultithreadingController controller) {
+        this.controller = controller;
+    }
 
-        return String.valueOf(timer / 1000000);
+    @RequestMapping("/")
+    public String get() throws InterruptedException, ExecutionException {
+        return controller.call(
+                "http://www.bing.com",
+                "http://www.google.com",
+                "http://www.yahoo.com",
+                "http://www.aol.com",
+                "http://www.msnbc.com");
     }
 }
